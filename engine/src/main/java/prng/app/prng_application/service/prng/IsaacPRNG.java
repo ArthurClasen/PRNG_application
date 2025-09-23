@@ -1,16 +1,24 @@
 package prng.app.prng_application.service.prng;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Random;
 
-public class IsaacPRNG implements PRNG {
+@Getter
+@Setter
+public class IsaacPRNG extends Random implements PRNG {
     private static final int SIZE = 256;
     private final int[] mem = new int[SIZE];
     private final int[] res = new int[SIZE];
     private int a,b,c;
     private int idx;
+    private int seed;
 
     public IsaacPRNG(int seed) {
+        this.seed = seed;
         Arrays.fill(res, seed); // preenche o array de resultados com o valor da semente
         init(); // inicializa o gerador
     }
@@ -65,7 +73,7 @@ public class IsaacPRNG implements PRNG {
     }
 
     // método para entregar valores gerados
-    private int nextInt() {
+    private int nextIntISAAC() {
         // caso o índice seja maior que o tamanho significa que ele já entregou todos os
         // valores do array, portanto devo gerar novos números e reiniciar o valor de idx
         if (idx >= SIZE) {
@@ -79,9 +87,9 @@ public class IsaacPRNG implements PRNG {
     public BigInteger nextBigInteger(int bits) { // método que retorna o valor gerado final
         if (bits <= 0) throw new IllegalArgumentException("bits must be positive"); // bits tem que ser maior que 0
         int words = (bits + 31) / 32; // conversão de quantidade de bits para quantidade de palavras
-        byte[] out = new byte[words]; // array de bytes (é o que vai ser utilizado para criar o BigInteger)
+        byte[] out = new byte[words*4]; // array de bytes (é o que vai ser utilizado para criar o BigInteger)
         for (int i = 0; i < words; i++) { // vai criar todos os bytes a partir dos valores inteiros
-            int val = nextInt();
+            int val = nextIntISAAC();
             int off = i*4; // multiplica por 4, pois inteiro tem 32 bits ou 4 bytes
             out[off] =  (byte) (val >>> 24);
             out[off + 1] = (byte) (val >>> 16);
