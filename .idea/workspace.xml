@@ -4,26 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8d1db4cc-31d1-4188-a133-7f6151f300ba" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/PRNG_application.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/PRNG_application.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/project.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/material_theme_project_new.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/.idea/compiler.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/.idea/jarRepositories.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/src/main/java/prng/app/prng_application/PrngApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/engine/src/main/java/prng/app/prng_application/PrngApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/src/main/java/prng/app/prng_application/service/primeChecker/MillerRabin.java" beforeDir="false" afterPath="$PROJECT_DIR$/engine/src/main/java/prng/app/prng_application/service/primeChecker/MillerRabin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/src/main/java/prng/app/prng_application/service/primeChecker/PrimalityTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/engine/src/main/java/prng/app/prng_application/service/primeChecker/PrimalityTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/target/classes/prng/app/prng_application/AlgorithmsTable.class" beforeDir="false" afterPath="$PROJECT_DIR$/engine/target/classes/prng/app/prng_application/AlgorithmsTable.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/target/classes/prng/app/prng_application/PrngApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/engine/target/classes/prng/app/prng_application/PrngApplication.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/target/classes/prng/app/prng_application/service/primeChecker/MillerRabin.class" beforeDir="false" afterPath="$PROJECT_DIR$/engine/target/classes/prng/app/prng_application/service/primeChecker/MillerRabin.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/target/classes/prng/app/prng_application/service/primeChecker/PrimalityTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/engine/target/classes/prng/app/prng_application/service/primeChecker/PrimalityTest.class" afterDir="false" />
-    </list>
+    <list default="true" id="8d1db4cc-31d1-4188-a133-7f6151f300ba" name="Changes" comment="commit" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -103,11 +84,24 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1758817407716</updated>
-      <workItem from="1758817409643" duration="5108000" />
+      <workItem from="1758817409643" duration="5416000" />
     </task>
+    <task id="LOCAL-00001" summary="commit">
+      <option name="closed" value="true" />
+      <created>1758822840842</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1758822840843</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit" />
   </component>
 </project>
