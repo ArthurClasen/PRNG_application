@@ -14,10 +14,11 @@ import prng.app.prng_application.service.ObjectAnalysisPRNG;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 public class PrngApplication implements ApplicationRunner {
-    private final int bitsArray[] = {40, 56, 80, 128, 168, 224, 256, 512, 1024, 2048, 4096};
+    private final int bitsArray[] = {40, 56, 80, 128, 168, 224, 256, 512, 1024, 2048};
     private final List<ObjectAnalysisPRNG> isaacArray;
     private final List<ObjectAnalysisPRNG> naorArray;
 
@@ -42,7 +43,7 @@ public class PrngApplication implements ApplicationRunner {
         }
     }
 
-    private List<String[]> formDataPRNG () {
+    private List<String[]> formDataPRNG () throws ExecutionException, InterruptedException {
         List<String[]> dataList = new ArrayList<>();
         long seed = System.nanoTime();
         System.out.println("Seed: " + seed);
@@ -57,7 +58,7 @@ public class PrngApplication implements ApplicationRunner {
                     analysisPRNGISAAC.getAlgorithm(),
                     String.valueOf(analysisPRNGISAAC.getSize()),
                     String.valueOf(analysisPRNGISAAC.getRandomNumber()),
-                    String.valueOf(analysisPRNGISAAC.getTimeGenerator()),
+                    String.valueOf(analysisPRNGISAAC.getTimeGenerator()/1000000),
                     String.valueOf(analysisPRNGISAAC.isPrime()),
             };
             dataList.add(data);
@@ -69,11 +70,12 @@ public class PrngApplication implements ApplicationRunner {
                     analysisPRNGReingold.getAlgorithm(),
                     String.valueOf(analysisPRNGReingold.getSize()),
                     String.valueOf(analysisPRNGReingold.getRandomNumber()),
-                    String.valueOf(analysisPRNGReingold.getTimeGenerator()),
+                    String.valueOf(analysisPRNGReingold.getTimeGenerator()/1000000),
                     String.valueOf(analysisPRNGReingold.isPrime())
             };
             dataList.add(data);
         }
+        /*
         for (ObjectAnalysisPRNG l : isaacArray) {
             fermatTest.isProbablePrime(l, 5);
             String[] data = {
@@ -85,13 +87,17 @@ public class PrngApplication implements ApplicationRunner {
             };
             dataList.add(data);
         }
+        */
         for (ObjectAnalysisPRNG m : naorArray) {
-            millerRabin.isProbablePrime(m, 5);
+            long start = System.nanoTime();
+            while (!m.isPrime()) millerRabin.isProbablePrime(m, 5);
+            long end = System.nanoTime();
+            m.setTimeTester(end - start);
             String[] data = {
                     m.getTester(),
                     String.valueOf(m.getSize()),
                     String.valueOf(m.getRandomNumber()),
-                    String.valueOf(m.getTimeTester()),
+                    String.valueOf(m.getTimeTester()/1000000),
                     String.valueOf(m.isPrime())
             };
             dataList.add(data);

@@ -4,11 +4,17 @@ import prng.app.prng_application.service.prng.IsaacPRNG;
 import prng.app.prng_application.service.ObjectAnalysisPRNG;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
 
 public class MillerRabin implements PrimalityTest {
-    private final IsaacPRNG rnd = new IsaacPRNG(437);
+    private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
+    private final ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
+    private final ThreadLocal<IsaacPRNG> rndLocal = ThreadLocal.withInitial(() -> new IsaacPRNG(437)); // evitar condições de corrida
 
     private BigInteger uniformRandom(BigInteger bottom, BigInteger top) {
+        IsaacPRNG rnd = rndLocal.get();
         BigInteger res;
         do {
             res = rnd.nextBigInteger(8).getRandomNumber();
@@ -17,22 +23,16 @@ public class MillerRabin implements PrimalityTest {
     }
 
     @Override
-    public void isProbablePrime(ObjectAnalysisPRNG o, int rounds) {
-        long startTime = System.nanoTime();
+    public void isProbablePrime(ObjectAnalysisPRNG o, int rounds) throws ExecutionException, InterruptedException {
         o.setTester("Miller-Rabin");
         BigInteger n = o.getRandomNumber();
         if (n.compareTo(BigInteger.TWO) < 0) return;
         if (n.equals(BigInteger.TWO) || n.equals(BigInteger.valueOf(3))) { // 2 ou 3 são primos
             o.setPrime(true);
-            long endTime = System.nanoTime();
-            o.setTimeTester(endTime-startTime);
             return;
         }
         if (n.mod(BigInteger.TWO).equals(BigInteger.ZERO)){ // se "n" é par
             o.setRandomNumber(o.getRandomNumber().add(BigInteger.ONE)); // incrementa 1 (para não gerar número par)
-            isProbablePrime(o, rounds); // testa novamente o novo número
-            long endTime = System.nanoTime();
-            o.setTimeTester(endTime-startTime);
             return;
         }
 
@@ -44,27 +44,45 @@ public class MillerRabin implements PrimalityTest {
             s++;
         }
 
-        for (int i = 0; i < rounds; i++) {
-            BigInteger a = uniformRandom(BigInteger.TWO, n.subtract(BigInteger.TWO)); // escolher valor arbitrário para "a"
-            BigInteger x = a.modPow(d, n); // testa quando s = 0 e define a parte "a^d"
-            // se for igual a 1 ou n-1 continua o teste
-            if (x.equals(BigInteger.ONE) || x.equals(n.subtract(BigInteger.ONE))) continue;
-            boolean cont = false; // primo (a princípio não considera)
-            for (int r = 1; r < s; r++) { // elevar a todos os valores possíveis de "s" a partir de "1" (0 já foi verificado)
-                x = x.modPow(BigInteger.TWO, n); // eleva a 2 para testar todas as potências
-                if (x.equals(n.subtract(BigInteger.ONE))) { cont = true; break; } // se igualar à n-1 continua o teste e considera como primo
-            }
-            if (cont) continue;
-            // composto
-            o.setRandomNumber(o.getRandomNumber().add(BigInteger.TWO)); // incrementa 2 (para não gerar número par)
-            isProbablePrime(o, rounds); // testa novamente o novo número
-            long endTime = System.nanoTime();
-            o.setTimeTester(endTime-startTime);
-            return;
+        List<Future<Boolean>> futures = new ArrayList<>();
+        for (int i = 0; i < rounds; i++){
+            BigInteger finalD = d;
+            int finalS = s;
+            Callable<Boolean> task = () -> {
+                return performMillerRabin(o, finalD, finalS);
+            };
+            futures.add(executor.submit(task));
         }
-        o.setPrime(true); // provável primo
-        long endTime = System.nanoTime();
-        o.setTimeTester(endTime-startTime);
+        for (Future<Boolean> future : futures) {
+            try {
+                if (future.get() == Boolean.FALSE) {
+                    o.setPrime(false); // composto
+                    o.setRandomNumber(o.getRandomNumber().subtract(BigInteger.TWO));
+                    for (Future<Boolean> f : futures) {
+                        f.cancel(true);
+                    }
+                    return;
+                }
+            } catch (CancellationException e) {
+                break;
+            }
+        }
+        o.setPrime(true); // passou em todos os testes
+    }
+    private boolean performMillerRabin(ObjectAnalysisPRNG o, BigInteger d, int s){
+        BigInteger n = o.getRandomNumber();
+        BigInteger a = uniformRandom(BigInteger.TWO, n.subtract(BigInteger.TWO));
+        BigInteger x = a.modPow(d, n);
+        if (x.equals(BigInteger.ONE) || x.equals(n.subtract(BigInteger.ONE))) return true;
+        boolean cont = false; // primo (a princípio não considera)
+        for (int r = 1; r < s; r++) { // elevar a todos os valores possíveis de "s" a partir de "1" (0 já foi verificado)
+            if (Thread.currentThread().isInterrupted()) {
+                return true; // thread foi interrompida e retornará verdadeiro (outra thread provavelmente retorna falso caso não seja realmente primo)
+            }
+            x = x.modPow(BigInteger.TWO, n); // eleva a 2 para testar todas as potências
+            if (x.equals(n.subtract(BigInteger.ONE))) { cont = true; break; } // se igualar à n-1 continua o teste e considera como primo
+        }
+        return cont;
     }
 }
 
