@@ -2,6 +2,7 @@ package prng.app.prng_application.service.prng;
 
 import lombok.Getter;
 import lombok.Setter;
+import prng.app.prng_application.service.ObjectAnalysisPRNG;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -20,7 +21,7 @@ public class IsaacPRNG extends Random implements PRNG {
     public IsaacPRNG(int seed) {
         this.seed = seed;
         Arrays.fill(res, seed); // preenche o array de resultados com o valor da semente
-        init(); // inicializa o gerador
+        // init(); // inicializa o gerador
     }
 
     private void init() {
@@ -84,7 +85,9 @@ public class IsaacPRNG extends Random implements PRNG {
     }
 
     @Override
-    public BigInteger nextBigInteger(int bits) { // método que retorna o valor gerado final
+    public ObjectAnalysisPRNG nextBigInteger(int bits) { // método que retorna o valor gerado final
+        long startTime = System.nanoTime(); // tempo inicial
+        init();
         if (bits <= 0) throw new IllegalArgumentException("bits must be positive"); // bits tem que ser maior que 0
         int words = (bits + 31) / 32; // conversão de quantidade de bits para quantidade de palavras
         byte[] out = new byte[words*4]; // array de bytes (é o que vai ser utilizado para criar o BigInteger)
@@ -100,6 +103,8 @@ public class IsaacPRNG extends Random implements PRNG {
         // correção caso o número de bits não seja divisível por 32 (qtd de bits em palavras)
         int shift = words*32 - bits;
         if (shift > 0) big = big.shiftRight(shift);
-        return big;
+        long endTime = System.nanoTime(); // tempo final - para medir o tempo de execução
+        ObjectAnalysisPRNG analysis = new ObjectAnalysisPRNG("ISAAC", bits, endTime-startTime, big, false, null, 0);
+        return analysis;
     }
 }

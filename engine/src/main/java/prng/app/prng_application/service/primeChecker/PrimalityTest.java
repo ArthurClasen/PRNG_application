@@ -1,7 +1,7 @@
 package prng.app.prng_application.service.primeChecker;
 
-import java.math.BigInteger;
+import prng.app.prng_application.service.ObjectAnalysisPRNG;
 
 public interface PrimalityTest {
-    public boolean isProbablePrime(BigInteger n, int rounds);
+    public void isProbablePrime(ObjectAnalysisPRNG o, int rounds);
 }

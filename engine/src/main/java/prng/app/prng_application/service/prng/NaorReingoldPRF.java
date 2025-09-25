@@ -1,5 +1,8 @@
 package prng.app.prng_application.service.prng;
 
+import prng.app.prng_application.service.ObjectAnalysisPRNG;
+import prng.app.prng_application.service.primeChecker.FermatTest;
+
 import java.math.BigInteger;
 import java.security.MessageDigest;
 
@@ -8,17 +11,24 @@ public class NaorReingoldPRF implements PRNG {
     private final BigInteger g; // gerador (valor que será exponenciado)
     private final BigInteger[] a; // expoentes secretos
     private final IsaacPRNG rnd = new IsaacPRNG(437); // número aleatório gerado com o ISAAC
+    private final FermatTest test = new FermatTest();
+    private final long timeToGenerate; // tempo para inicializar o algoritmo
 
     public NaorReingoldPRF(int tBits, int primeBits) {
+        long startTime = System.nanoTime();
+        ObjectAnalysisPRNG primetest = rnd.nextBigInteger(primeBits);
+        test.isProbablePrime(primetest, 5);
         // primeBits: tamanho do "p" em bits (ex: 2048)
         // tBits: comprimento do "input" (número de bits usados por avaliação)
-        this.p = BigInteger.probablePrime(primeBits, rnd); // aqui usar um dos algoritmos de verificador de primos
+        this.p = primetest.getRandomNumber(); // aqui usar um dos algoritmos de verificador de primos
         this.g = BigInteger.TWO; // simplificação: usar 2 como gerador em muitos "p"
         this.a = new BigInteger[tBits]; // arrays de a's que serão usados para exponenciação
         for (int i = 0; i < tBits; i++) {
-            a[i] = rnd.nextBigInteger(128); // definição dos valores de aleatórios para 'a', usando ISAAC
+            a[i] = rnd.nextBigInteger(128).getRandomNumber(); // definição dos valores de aleatórios para 'a', usando ISAAC
             rnd.setSeed(rnd.getSeed()+1); // mudança de valor da semente
         }
+        long endTime = System.nanoTime();
+        this.timeToGenerate = endTime - startTime;
     }
 
     // método para realizar a equação
@@ -34,7 +44,8 @@ public class NaorReingoldPRF implements PRNG {
 
     // construir o valor de bigInteger
     @Override
-    public BigInteger nextBigInteger(int bits) {
+    public ObjectAnalysisPRNG nextBigInteger(int bits) {
+        long startTime = System.nanoTime(); // tempo inicial
         // concatena avaliações em x=0,1,2,... até preencher bits
         int needed = bits; // quantos bits ainda são necessários para gerar
         BigInteger result = BigInteger.ZERO; // resultado acumulado
@@ -49,7 +60,10 @@ public class NaorReingoldPRF implements PRNG {
             result = result.shiftLeft(chunk).or(chunkVal); // concatena os bits
             needed -= chunk; // diminui o valor de bits necessários
         }
-        return result;
+        long endTime = System.nanoTime(); // tempo final - para calcular tempo de execução
+        long totalTime = endTime - startTime + timeToGenerate;
+        ObjectAnalysisPRNG analysis = new ObjectAnalysisPRNG("NaorReingold", bits, totalTime, result, false, null, 0);
+        return analysis;
     }
 
     private byte[] hash(byte[] input) {

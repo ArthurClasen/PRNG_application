@@ -1,6 +1,7 @@
 package prng.app.prng_application.service.primeChecker;
 
 import prng.app.prng_application.service.prng.IsaacPRNG;
+import prng.app.prng_application.service.ObjectAnalysisPRNG;
 
 import java.math.BigInteger;
 
@@ -10,16 +11,30 @@ public class MillerRabin implements PrimalityTest {
     private BigInteger uniformRandom(BigInteger bottom, BigInteger top) {
         BigInteger res;
         do {
-            res = rnd.nextBigInteger(32);
+            res = rnd.nextBigInteger(8).getRandomNumber();
         } while (res.compareTo(bottom) < 0 || res.compareTo(top) > 0);
         return res;
     }
 
     @Override
-    public boolean isProbablePrime(BigInteger n, int rounds) {
-        if (n.compareTo(BigInteger.TWO) < 0) return false;
-        if (n.equals(BigInteger.TWO) || n.equals(BigInteger.valueOf(3))) return true; // 2 ou 3 são primos
-        if (n.mod(BigInteger.TWO).equals(BigInteger.ZERO)) return false; // se "n" é par
+    public void isProbablePrime(ObjectAnalysisPRNG o, int rounds) {
+        long startTime = System.nanoTime();
+        o.setTester("Miller-Rabin");
+        BigInteger n = o.getRandomNumber();
+        if (n.compareTo(BigInteger.TWO) < 0) return;
+        if (n.equals(BigInteger.TWO) || n.equals(BigInteger.valueOf(3))) { // 2 ou 3 são primos
+            o.setPrime(true);
+            long endTime = System.nanoTime();
+            o.setTimeTester(endTime-startTime);
+            return;
+        }
+        if (n.mod(BigInteger.TWO).equals(BigInteger.ZERO)){ // se "n" é par
+            o.setRandomNumber(o.getRandomNumber().add(BigInteger.ONE)); // incrementa 1 (para não gerar número par)
+            isProbablePrime(o, rounds); // testa novamente o novo número
+            long endTime = System.nanoTime();
+            o.setTimeTester(endTime-startTime);
+            return;
+        }
 
         // definir os valores de "d" e "s" em "n-1 = 2^s * d"
         BigInteger d = n.subtract(BigInteger.ONE);
@@ -39,10 +54,17 @@ public class MillerRabin implements PrimalityTest {
                 x = x.modPow(BigInteger.TWO, n); // eleva a 2 para testar todas as potências
                 if (x.equals(n.subtract(BigInteger.ONE))) { cont = true; break; } // se igualar à n-1 continua o teste e considera como primo
             }
-            if (cont) continue; //
-            return false; // composto
+            if (cont) continue;
+            // composto
+            o.setRandomNumber(o.getRandomNumber().add(BigInteger.TWO)); // incrementa 2 (para não gerar número par)
+            isProbablePrime(o, rounds); // testa novamente o novo número
+            long endTime = System.nanoTime();
+            o.setTimeTester(endTime-startTime);
+            return;
         }
-        return true; // provável primo
+        o.setPrime(true); // provável primo
+        long endTime = System.nanoTime();
+        o.setTimeTester(endTime-startTime);
     }
 }
 
