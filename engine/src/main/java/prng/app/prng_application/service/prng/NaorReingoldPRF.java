@@ -12,7 +12,6 @@ public class NaorReingoldPRF implements PRNG {
     private final BigInteger p; // módulo primo
     private final BigInteger g; // gerador (valor que será exponenciado)
     private final BigInteger[] a; // expoentes secretos
-    private final SeedConverter randomSeed = new SeedConverter();
     private final long timeToGenerate; // tempo para inicializar o algoritmo
 
     public NaorReingoldPRF(int tBits, int primeBits, IsaacPRNG rnd, FermatTest test) throws NoSuchAlgorithmException {

@@ -45,7 +45,10 @@ public class PrngApplication implements ApplicationRunner {
     }
 
     private List<String[]> formDataPRNG () throws NoSuchAlgorithmException {
+        long sum = 0;
         List<String[]> dataList = new ArrayList<>();
+        ObjectAnalysisPRNG analysisPRNGISAAC = null;
+        ObjectAnalysisPRNG analysisPRNGReingold = null;
         int[] seed =  new SeedConverter().getSecureIntSeed(); // criação da semente
         System.out.println("Seed:"); // declaração da semente
         for (int s : seed){
@@ -56,29 +59,70 @@ public class PrngApplication implements ApplicationRunner {
         FermatTest fermatTest = new FermatTest(isaacPRNG); // teste de Fermat (uso de ISAAC para aleatoriedade de valores de teste)
         MillerRabin millerRabin = new MillerRabin(isaacPRNG); // teste de MillerRabin (ISAAC tem mesmo principio do Fermat)
         for (int j : bitsArray) { // gerar tabela de números aleatórios usando ISAAC
-            ObjectAnalysisPRNG analysisPRNGISAAC = isaacPRNG.nextBigInteger(j);
+            sum = 0;
+            for (int i = 0; i < 4; i++) {
+                analysisPRNGISAAC = isaacPRNG.nextBigInteger(j);
+                sum += analysisPRNGISAAC.getTimeGenerator();
+            } // gerar 4 números aleatórios
+            boolean ideal = false;
+            int zerosCount = 0;
+            int onesCount = 0;
+            int runs = 0;
+            while (!ideal) {
+                analysisPRNGISAAC = isaacPRNG.nextBigInteger(j);
+                onesCount = analysisPRNGISAAC.getRandomNumber().bitCount();
+                zerosCount = j - onesCount;
+                runs = calculateRuns(analysisPRNGISAAC.getRandomNumber().toString(2));
+                ideal = idealRuns(zerosCount, onesCount, runs);
+            }
+            sum += analysisPRNGISAAC.getTimeGenerator();
             isaacArray.add(analysisPRNGISAAC);
             String[] data = {
                     analysisPRNGISAAC.getAlgorithm(),
                     String.valueOf(analysisPRNGISAAC.getSize()),
                     String.valueOf(analysisPRNGISAAC.getRandomNumber()),
-                    String.valueOf(analysisPRNGISAAC.getTimeGenerator()),
+                    String.valueOf(sum / 5000),
                     String.valueOf(analysisPRNGISAAC.isPrime()),
+                    String.valueOf(zerosCount),
+                    String.valueOf(onesCount),
+                    String.valueOf(runs),
+                    String.valueOf(idealRuns(zerosCount, onesCount, runs))
             };
             dataList.add(data);
         }
         for (int k : bitsArray) { // gerar tabela de números aleatórios usando NaorReingold
-            ObjectAnalysisPRNG analysisPRNGReingold = naorReingoldPRF.nextBigInteger(k);
+            sum = 0;
+            for (int i = 0; i < 4; i++) {
+                analysisPRNGReingold = naorReingoldPRF.nextBigInteger(k);
+                sum += analysisPRNGReingold.getTimeGenerator();
+            }
+            boolean ideal = false;
+            int zerosCount = 0;
+            int onesCount = 0;
+            int runs = 0;
+            while (!ideal) {
+                analysisPRNGReingold = naorReingoldPRF.nextBigInteger(k);
+                onesCount = analysisPRNGReingold.getRandomNumber().bitCount();
+                zerosCount = k - onesCount;
+                runs = calculateRuns(analysisPRNGReingold.getRandomNumber().toString(2));
+                ideal = idealRuns(zerosCount, onesCount, runs);
+            }
+            sum +=  analysisPRNGReingold.getTimeGenerator();
             naorArray.add(analysisPRNGReingold);
             String[] data = {
                     analysisPRNGReingold.getAlgorithm(),
                     String.valueOf(analysisPRNGReingold.getSize()),
                     String.valueOf(analysisPRNGReingold.getRandomNumber()),
-                    String.valueOf(analysisPRNGReingold.getTimeGenerator()),
-                    String.valueOf(analysisPRNGReingold.isPrime())
+                    String.valueOf(sum / 5000),
+                    String.valueOf(analysisPRNGReingold.isPrime()),
+                    String.valueOf(zerosCount),
+                    String.valueOf(onesCount),
+                    String.valueOf(runs),
+                    String.valueOf(idealRuns(zerosCount, onesCount, runs))
             };
             dataList.add(data);
         }
+        sum = 0;
         for (ObjectAnalysisPRNG l : isaacArray) { // gerar tabela de números primos (teste de Fermat) gerados por ISAAC
             long startTime = System.nanoTime();
             fermatTest.isProbablePrime(l, 5);
@@ -88,7 +132,7 @@ public class PrngApplication implements ApplicationRunner {
                     l.getTester(),
                     String.valueOf(l.getSize()),
                     String.valueOf(l.getRandomNumber()),
-                    String.valueOf(l.getTimeTester()),
+                    String.valueOf(l.getTimeTester()/1000),
                     String.valueOf(l.isPrime())
             };
             dataList.add(data);
@@ -102,11 +146,40 @@ public class PrngApplication implements ApplicationRunner {
                     m.getTester(),
                     String.valueOf(m.getSize()),
                     String.valueOf(m.getRandomNumber()),
-                    String.valueOf(m.getTimeTester()),
+                    String.valueOf(m.getTimeTester()/1000),
                     String.valueOf(m.isPrime())
             };
             dataList.add(data);
         }
         return dataList;
+    }
+
+    // método utilizado para calcular quantidade de runs
+    private static int calculateRuns(String binaryString) {
+        if (binaryString == null || binaryString.length() == 0) {
+            return 0;
+        }
+
+        int runs = 1; // Começa com 1, pois a primeira sequência já conta
+        char[] bits = binaryString.toCharArray();
+
+        // Percorre a string comparando cada bit com o anterior
+        for (int i = 1; i < bits.length; i++) {
+            // Se o bit atual for diferente do bit anterior, uma nova sequência (run) começou
+            if (bits[i] != bits[i - 1]) {
+                runs++;
+            }
+        }
+        return runs;
+    }
+
+    // método para verificar qualidade de runs
+    private boolean idealRuns(double num0, double num1, double runs) {
+        double E = (2*num0*num1)/(num0+num1) + 1; // calcula o valor esperado
+        double stdDev = (2*num0*num1)*(2*num0*num1-(num1+num0))/(Math.pow((num0+num1), 2)*(num0+num1-1)); // desvio padrão
+        double stdDevRoot = Math.sqrt(stdDev); // variância
+        double low = E - 1.96*stdDevRoot; // limite inferior
+        double high = E + 1.96*stdDevRoot; // limite superior
+        return !(runs < low) && !(runs > high); // se não estiver entre os limites retornar falso, se não verdadeiro
     }
 }
