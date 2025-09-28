@@ -5,7 +5,6 @@ import lombok.Setter;
 import prng.app.prng_application.service.ObjectAnalysisPRNG;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.Random;
 
 @Getter
@@ -16,12 +15,12 @@ public class IsaacPRNG extends Random implements PRNG {
     private final int[] res = new int[SIZE];
     private int a,b,c;
     private int idx;
-    private int seed;
 
-    public IsaacPRNG(int seed) {
-        this.seed = seed;
-        Arrays.fill(res, seed); // preenche o array de resultados com o valor da semente
-        // init(); // inicializa o gerador
+    public IsaacPRNG(int[] seed) {
+        for (int i = 0; i < SIZE; i++) {
+            res[i] = seed[i % seed.length];
+        }
+        init();
     }
 
     private void init() {
@@ -87,7 +86,6 @@ public class IsaacPRNG extends Random implements PRNG {
     @Override
     public ObjectAnalysisPRNG nextBigInteger(int bits) { // método que retorna o valor gerado final
         long startTime = System.nanoTime(); // tempo inicial
-        init();
         if (bits <= 0) throw new IllegalArgumentException("bits must be positive"); // bits tem que ser maior que 0
         int words = (bits + 31) / 32; // conversão de quantidade de bits para quantidade de palavras
         byte[] out = new byte[words*4]; // array de bytes (é o que vai ser utilizado para criar o BigInteger)

@@ -2,37 +2,32 @@ package prng.app.prng_application.service.primeChecker;
 
 import prng.app.prng_application.service.prng.IsaacPRNG;
 import prng.app.prng_application.service.ObjectAnalysisPRNG;
-
 import java.math.BigInteger;
 
 public class MillerRabin implements PrimalityTest {
-    private final IsaacPRNG rnd = new IsaacPRNG(437);
+    private final IsaacPRNG rnd;
 
-    private BigInteger uniformRandom(BigInteger bottom, BigInteger top) {
+    public MillerRabin(IsaacPRNG rnd) {
+        this.rnd = rnd;
+    }
+
+    private BigInteger uniformRandom(BigInteger bottom, BigInteger top) { // testar com números aleatórios
         BigInteger res;
+        int bitlen = top.bitLength();
         do {
-            res = rnd.nextBigInteger(8).getRandomNumber();
+            res = rnd.nextBigInteger(bitlen).getRandomNumber();
         } while (res.compareTo(bottom) < 0 || res.compareTo(top) > 0);
         return res;
     }
 
     @Override
     public void isProbablePrime(ObjectAnalysisPRNG o, int rounds) {
-        long startTime = System.nanoTime();
         o.setTester("Miller-Rabin");
         BigInteger n = o.getRandomNumber();
         if (n.compareTo(BigInteger.TWO) < 0) return;
-        if (n.equals(BigInteger.TWO) || n.equals(BigInteger.valueOf(3))) { // 2 ou 3 são primos
-            o.setPrime(true);
-            long endTime = System.nanoTime();
-            o.setTimeTester(endTime-startTime);
-            return;
-        }
         if (n.mod(BigInteger.TWO).equals(BigInteger.ZERO)){ // se "n" é par
             o.setRandomNumber(o.getRandomNumber().add(BigInteger.ONE)); // incrementa 1 (para não gerar número par)
             isProbablePrime(o, rounds); // testa novamente o novo número
-            long endTime = System.nanoTime();
-            o.setTimeTester(endTime-startTime);
             return;
         }
 
@@ -58,13 +53,9 @@ public class MillerRabin implements PrimalityTest {
             // composto
             o.setRandomNumber(o.getRandomNumber().add(BigInteger.TWO)); // incrementa 2 (para não gerar número par)
             isProbablePrime(o, rounds); // testa novamente o novo número
-            long endTime = System.nanoTime();
-            o.setTimeTester(endTime-startTime);
             return;
         }
         o.setPrime(true); // provável primo
-        long endTime = System.nanoTime();
-        o.setTimeTester(endTime-startTime);
     }
 }
 

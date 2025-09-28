@@ -2,7 +2,9 @@
   <dictionary name="project">
     <words>
       <w>naor</w>
+      <w>pseudoaleatório</w>
       <w>reingold</w>
+      <w>trng</w>
     </words>
   </dictionary>
 </component>
