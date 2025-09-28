@@ -19,7 +19,7 @@ import java.util.List;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 public class PrngApplication implements ApplicationRunner {
-    private final int bitsArray[] = {40, 56, 80, 128, 168, 224, 256, 512, 1024, 2048};
+    private final int bitsArray[] = {40, 56, 80, 128, 168, 224, 256, 512, 1024, 2048, 4096};
     private final List<ObjectAnalysisPRNG> isaacArray;
     private final List<ObjectAnalysisPRNG> naorArray;
 
