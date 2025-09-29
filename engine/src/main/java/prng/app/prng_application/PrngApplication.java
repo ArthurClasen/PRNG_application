@@ -128,7 +128,7 @@ public class PrngApplication implements ApplicationRunner {
         for (ObjectAnalysisPRNG l : isaacArray) { // gerar tabela de números primos (teste de Fermat) gerados por ISAAC
             ObjectAnalysisPRNG copy = new ObjectAnalysisPRNG(l);
             long startTime = System.nanoTime();
-            millerRabin.isProbablePrime(copy, 5);
+            fermatTest.isProbablePrime(copy, 5);
             long endTime = System.nanoTime();
             copy.setTimeTester(endTime - startTime);
             String[] data = {
@@ -142,7 +142,7 @@ public class PrngApplication implements ApplicationRunner {
         }
         for (ObjectAnalysisPRNG l : isaacArray) { // gerar tabela de números primos (teste de MillerRabin) gerados por ISAAC
             long startTime = System.nanoTime();
-            fermatTest.isProbablePrime(l, 5);
+            millerRabin.isProbablePrime(l, 5);
             long endTime = System.nanoTime();
             l.setTimeTester(endTime - startTime);
             String[] data = {
