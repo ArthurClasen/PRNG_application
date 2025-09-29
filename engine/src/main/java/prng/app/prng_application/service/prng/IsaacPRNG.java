@@ -106,3 +106,6 @@ public class IsaacPRNG extends Random implements PRNG {
         return analysis;
     }
 }
+
+
+// 11110000010011111000000111100000

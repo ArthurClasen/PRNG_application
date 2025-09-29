@@ -13,13 +13,14 @@ import prng.app.prng_application.service.prng.IsaacPRNG;
 import prng.app.prng_application.service.prng.NaorReingoldPRF;
 import prng.app.prng_application.service.ObjectAnalysisPRNG;
 
+import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 public class PrngApplication implements ApplicationRunner {
-    private final int bitsArray[] = {40, 56, 80, 128, 168, 224, 256, 512, 1024, 2048, 4096};
+    private final int bitsArray[] = {40, 56, 80, 128, 168, 224, 256, 512, 1024, 2048};
     private final List<ObjectAnalysisPRNG> isaacArray;
     private final List<ObjectAnalysisPRNG> naorArray;
 
@@ -68,7 +69,7 @@ public class PrngApplication implements ApplicationRunner {
             int zerosCount = 0;
             int onesCount = 0;
             int runs = 0;
-            while (!ideal) {
+            while (!ideal) { // enquanto o número não tiver um valor de run ideal, continuar a buscar um valor aleatório excelente
                 analysisPRNGISAAC = isaacPRNG.nextBigInteger(j);
                 onesCount = analysisPRNGISAAC.getRandomNumber().bitCount();
                 zerosCount = j - onesCount;
@@ -151,6 +152,27 @@ public class PrngApplication implements ApplicationRunner {
             };
             dataList.add(data);
         }
+
+        // testes de fermat (falso positivo) e miller-rabin (negativo corrigido)
+        ObjectAnalysisPRNG falsePositiveTest = new ObjectAnalysisPRNG("", 10, 0, BigInteger.valueOf(561), false, "Fermat", 0);
+        ObjectAnalysisPRNG trueNegativeTest = new ObjectAnalysisPRNG("", 10, 0, BigInteger.valueOf(561), false, "Miller-Rabin", 0);
+
+        String[] falsePositiveTestData = {
+                falsePositiveTest.getTester(),
+                String.valueOf(falsePositiveTest.getSize()),
+                String.valueOf(falsePositiveTest.getRandomNumber()),
+                String.valueOf(falsePositiveTest.getTimeTester()),
+                String.valueOf(falsePositiveTest.isPrime()),
+        };
+        dataList.add(falsePositiveTestData);
+        String[] trueNegativeTestData = {
+                trueNegativeTest.getTester(),
+                String.valueOf(trueNegativeTest.getSize()),
+                String.valueOf(trueNegativeTest.getRandomNumber()),
+                String.valueOf(trueNegativeTest.getTimeTester()),
+                String.valueOf(trueNegativeTest.isPrime()),
+        };
+        dataList.add(trueNegativeTestData);
         return dataList;
     }
 
