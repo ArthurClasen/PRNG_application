@@ -37,6 +37,7 @@ public class FermatTest implements PrimalityTest {
         for (int i = 0; i < rounds; i++) {
             // número qualquer para a (valor que será exponenciado)
             BigInteger a = uniformRandom(BigInteger.TWO, n.subtract(BigInteger.TWO));
+            // BigInteger a = BigInteger.valueOf(((i*3+1)*(3*11*15+1))); // gerarei valores que não são divisíveis nem por 3, 11 ou 15 (para o teste) - uso somente para esse teste específico
             // retorna falso caso seja respeitado o teorema de Fermat
             if (!a.modPow(n.subtract(BigInteger.ONE), n).equals(BigInteger.ONE)) {
                 o.setRandomNumber(o.getRandomNumber().add(BigInteger.TWO)); // incrementa 2 (para não gerar número par)

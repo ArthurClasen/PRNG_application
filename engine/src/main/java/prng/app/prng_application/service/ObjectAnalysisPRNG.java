@@ -17,4 +17,14 @@ public class ObjectAnalysisPRNG {
     private boolean isPrime;
     private String tester;
     private long timeTester;
+
+    public ObjectAnalysisPRNG(ObjectAnalysisPRNG o){
+        this.algorithm = o.algorithm;
+        this.size = o.size;
+        this.timeGenerator = o.timeGenerator;
+        this.randomNumber = o.randomNumber;
+        this.isPrime = o.isPrime;
+        this.tester = o.tester;
+        this.timeTester = o.timeTester;
+    }
 }

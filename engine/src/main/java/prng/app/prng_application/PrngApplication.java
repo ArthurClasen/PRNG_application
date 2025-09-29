@@ -20,7 +20,7 @@ import java.util.List;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 public class PrngApplication implements ApplicationRunner {
-    private final int bitsArray[] = {40, 56, 80, 128, 168, 224, 256, 512, 1024, 2048};
+    private final int bitsArray[] = {40, 56, 80, 128, 168, 224, 256};
     private final List<ObjectAnalysisPRNG> isaacArray;
     private final List<ObjectAnalysisPRNG> naorArray;
 
@@ -124,7 +124,23 @@ public class PrngApplication implements ApplicationRunner {
             dataList.add(data);
         }
         sum = 0;
+        // testadores de números primos
         for (ObjectAnalysisPRNG l : isaacArray) { // gerar tabela de números primos (teste de Fermat) gerados por ISAAC
+            ObjectAnalysisPRNG copy = new ObjectAnalysisPRNG(l);
+            long startTime = System.nanoTime();
+            millerRabin.isProbablePrime(copy, 5);
+            long endTime = System.nanoTime();
+            copy.setTimeTester(endTime - startTime);
+            String[] data = {
+                    copy.getTester(),
+                    String.valueOf(copy.getSize()),
+                    String.valueOf(copy.getRandomNumber()),
+                    String.valueOf(copy.getTimeTester()/1000),
+                    String.valueOf(copy.isPrime())
+            };
+            dataList.add(data);
+        }
+        for (ObjectAnalysisPRNG l : isaacArray) { // gerar tabela de números primos (teste de MillerRabin) gerados por ISAAC
             long startTime = System.nanoTime();
             fermatTest.isProbablePrime(l, 5);
             long endTime = System.nanoTime();
@@ -135,6 +151,21 @@ public class PrngApplication implements ApplicationRunner {
                     String.valueOf(l.getRandomNumber()),
                     String.valueOf(l.getTimeTester()/1000),
                     String.valueOf(l.isPrime())
+            };
+            dataList.add(data);
+        }
+        for (ObjectAnalysisPRNG m : naorArray) { // gerar tabela de números primos (teste de Fermat) gerados por NaorReingold
+            ObjectAnalysisPRNG copy = new ObjectAnalysisPRNG(m);
+            long startTime = System.nanoTime();
+            fermatTest.isProbablePrime(copy, 5);
+            long endTime = System.nanoTime();
+            copy.setTimeTester(endTime - startTime);
+            String[] data = {
+                    copy.getTester(),
+                    String.valueOf(copy.getSize()),
+                    String.valueOf(copy.getRandomNumber()),
+                    String.valueOf(copy.getTimeTester()/1000),
+                    String.valueOf(copy.isPrime())
             };
             dataList.add(data);
         }
@@ -154,9 +185,11 @@ public class PrngApplication implements ApplicationRunner {
         }
 
         // testes de fermat (falso positivo) e miller-rabin (negativo corrigido)
+        /* uso somente para aquele teste dos números
         ObjectAnalysisPRNG falsePositiveTest = new ObjectAnalysisPRNG("", 10, 0, BigInteger.valueOf(561), false, "Fermat", 0);
         ObjectAnalysisPRNG trueNegativeTest = new ObjectAnalysisPRNG("", 10, 0, BigInteger.valueOf(561), false, "Miller-Rabin", 0);
-
+        fermatTest.isProbablePrime(falsePositiveTest, 5);
+        millerRabin.isProbablePrime(trueNegativeTest, 5);
         String[] falsePositiveTestData = {
                 falsePositiveTest.getTester(),
                 String.valueOf(falsePositiveTest.getSize()),
@@ -173,6 +206,7 @@ public class PrngApplication implements ApplicationRunner {
                 String.valueOf(trueNegativeTest.isPrime()),
         };
         dataList.add(trueNegativeTestData);
+        */
         return dataList;
     }
 
